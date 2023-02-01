@@ -21,7 +21,7 @@ export interface BaseOrganizeOptions<TPresets extends Presets> {
   ignoreCase?: boolean;
 }
 
-export type OrganizeOptionsSort = "ASC" | "DESC" | boolean;
+export type OrganizeOptionsSort = "ASC" | "DESC" | "UNOCSS" | boolean;
 export interface MapOrganizeOptions<TPresets extends Presets, TValue>
   extends BaseOrganizeOptions<TPresets> {
   map: (value: TValue) => string;
@@ -109,6 +109,68 @@ export function miniorganize<TValue>(
 
       if (options.sort === "DESC") {
         group.values.reverse();
+      }
+
+      if (options.sort === "UNOCSS") {
+        const onlyBg = group.values
+          .filter((e) => getString(e).startsWith("bg"))
+          .sort((a, b) => getString(a).localeCompare(getString(b)));
+
+        const onlyWH = group.values
+          .filter(
+            (e) =>
+              getString(e).startsWith("w-") || getString(e).startsWith("h-")
+          )
+          .sort((a, b) => getString(a).localeCompare(getString(b)));
+
+        const onlyMP = group.values
+          .filter(
+            (e) =>
+              getString(e).startsWith("m-") || getString(e).startsWith("p-")
+          )
+          .sort((a, b) => getString(a).localeCompare(getString(b)));
+
+        const onlyText = group.values
+          .filter((e) => getString(e).startsWith("text"))
+          .sort((a, b) => getString(a).localeCompare(getString(b)));
+
+        const onlyDisplayProps = group.values
+          .filter(
+            (e) =>
+              getString(e).startsWith("flex") ||
+              getString(e).startsWith("grid") ||
+              getString(e).startsWith("fc") ||
+              getString(e).startsWith("justify") ||
+              getString(e).startsWith("items") ||
+              getString(e).startsWith("relative") ||
+              getString(e).startsWith("absolute") ||
+              getString(e).startsWith("fixed") ||
+              getString(e).startsWith("sticky") ||
+              getString(e).startsWith("top") ||
+              getString(e).startsWith("left") ||
+              getString(e).startsWith("right") ||
+              getString(e).startsWith("bottom")
+          )
+          .sort((a, b) => getString(a).localeCompare(getString(b)));
+
+        const priority = group.values.filter(
+          (e) => getString(e).startsWith(":") || getString(e).startsWith("@")
+        );
+
+        const knownAttrs = [
+          ...priority,
+          ...onlyDisplayProps,
+          ...onlyWH,
+          ...onlyMP,
+          ...onlyText,
+          ...onlyBg,
+        ];
+
+        const unknownAttrs = group.values.filter(
+          (e) => !knownAttrs.includes(e)
+        );
+
+        group.values = [...knownAttrs, ...unknownAttrs];
       }
     });
   }

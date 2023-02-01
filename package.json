@@ -1,5 +1,4 @@
 {
-  "private":"false",
   "name": "@nikolastojicic/prettier-plugin-organize-attributes",
   "version": "0.1.0",
   "description": "Organize your HTML attributes autmatically with Prettier 🧼",
